@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bali Scuba Admin - Sign In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-900 text-slate-900">
+
+    <!-- 풀스크린 사진 배경 (켈링킹 비치 항공샷) + 그라디언트 오버레이 -->
+    <div class="fixed inset-0">
+        <div class="absolute inset-0 bg-photo" style="background-image: url('assets/images/trips/nusa-penida.png');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/40 to-slate-900/80"></div>
+    </div>
+
+    <main class="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md">
+            <!-- 브랜드 -->
+            <div class="text-center mb-8">
+                <p class="text-2xl font-extrabold tracking-tight text-white">
+                    BALI <span class="text-cyan-300">SCUBA</span>
+                </p>
+                <p class="text-cyan-100/80 text-sm mt-1 font-medium">Booking Admin Dashboard</p>
+            </div>
+
+            <!-- 로그인 카드 (glass-card) -->
+            <form id="login-form" class="glass-card rounded-3xl shadow-2xl shadow-slate-900/40 p-7 sm:p-8">
+                <h1 class="text-xl font-bold text-slate-900 mb-1">Welcome back</h1>
+                <p class="text-sm text-slate-500 mb-6">Sign in to manage your dive bookings</p>
+
+                <div id="login-error" class="hidden mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"></div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5" for="login-email">Email</label>
+                    <input id="login-email" type="email" autocomplete="username" required placeholder="admin@baliscuba.com"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-900">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5" for="login-password">Password</label>
+                    <input id="login-password" type="password" autocomplete="current-password" required placeholder="••••••••"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-900">
+                </div>
+
+                <button id="login-submit" type="submit"
+                        class="w-full py-3.5 btn-primary text-white rounded-xl font-semibold shadow-lg shadow-cyan-900/20">
+                    Sign In
+                </button>
+            </form>
+
+            <p class="text-center text-white/60 text-xs mt-6">
+                © 2026 Bali Scuba · Admin access only
+            </p>
+        </div>
+    </main>
+
+    <script type="module" src="scripts/login.js"></script>
+</body>
+</html>
