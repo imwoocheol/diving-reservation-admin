@@ -217,7 +217,40 @@ function initCharts() {
       plugins: {
         legend: {
           position: 'right',
-          labels: { color: '#475569', boxWidth: 12, font: { size: 11 } },
+          labels: {
+            color: '#475569',
+            boxWidth: 12,
+            font: { size: 11 },
+            // 범례 라벨에 실제 데이터 기준 퍼센트를 함께 표시
+            generateLabels: (chart) => {
+              const data = chart.data.datasets[0].data;
+              const total = data.reduce((sum, v) => sum + v, 0);
+              return chart.data.labels.map((label, i) => {
+                const value = data[i];
+                const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                return {
+                  text: `${label} (${pct}%)`,
+                  fillStyle: CATEGORY_COLORS[i],
+                  strokeStyle: '#ffffff',
+                  lineWidth: 2,
+                  hidden: false,
+                  index: i,
+                };
+              });
+            },
+          },
+        },
+        tooltip: {
+          callbacks: {
+            // 툴팁에도 건수와 함께 퍼센트 표시
+            label: (context) => {
+              const data = context.dataset.data;
+              const total = data.reduce((sum, v) => sum + v, 0);
+              const value = context.parsed;
+              const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+              return `${context.label}: ${value}건 (${pct}%)`;
+            },
+          },
         },
       },
     },
