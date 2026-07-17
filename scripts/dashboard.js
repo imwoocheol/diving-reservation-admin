@@ -160,6 +160,37 @@ function categoryBuckets() {
   return counts;
 }
 
+// 도넛 조각 위에 퍼센트를 직접 그리는 커스텀 플러그인 (별도 라이브러리 없이 canvas API로 구현)
+const donutPercentagePlugin = {
+  id: 'donutPercentageLabels',
+  afterDraw(chart) {
+    const meta = chart.getDatasetMeta(0);
+    const data = chart.data.datasets[0].data;
+    const total = data.reduce((sum, v) => sum + v, 0);
+    if (total <= 0) return;
+
+    const { ctx } = chart;
+    ctx.save();
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    meta.data.forEach((arc, i) => {
+      const value = data[i];
+      if (!value) return; // 값이 0인 조각은 라벨 생략
+      const pct = Math.round((value / total) * 100);
+      if (pct < 5) return; // 너무 얇은 조각은 라벨이 겹치므로 생략
+      const { x, y } = arc.getCenterPoint();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)'; // 어떤 배경색 위에서도 읽히도록 외곽선 처리
+      ctx.strokeText(`${pct}%`, x, y);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(`${pct}%`, x, y);
+    });
+    ctx.restore();
+  },
+};
+
 function initCharts() {
   if (!window.Chart) {
     console.error('[Chart] Chart.js 로드 실패 — 차트 비활성화');
@@ -199,6 +230,7 @@ function initCharts() {
 
   doughnutChart = new window.Chart(doughnutCtx, {
     type: 'doughnut',
+    plugins: [donutPercentagePlugin],
     data: {
       labels: TRIP_LABELS,
       datasets: [
