@@ -3,6 +3,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { getStorage } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
 // 예약 사이트(index.html)와 동일한 Firebase 프로젝트를 가리킴
 const firebaseConfig = {
@@ -18,3 +19,4 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);

@@ -58,9 +58,39 @@
                         <input id="popup-title" type="text" placeholder="e.g. Monsoon Season Sale"
                                class="w-full mb-4 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40">
 
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-image">Image URL</label>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-image">Media URL</label>
                         <input id="popup-image" type="url" placeholder="https://…/banner.jpg"
-                               class="w-full mb-4 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40">
+                               class="w-full mb-3 px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40">
+
+                        <!-- 미디어 타입 (URL 직접 입력 시 이미지/비디오 구분용 토글) -->
+                        <div class="flex items-center gap-4 mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type</span>
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="media-type-image" type="radio" name="popup-media-type" value="image" checked class="admin-radio">
+                                <span class="text-sm font-medium text-slate-700">Image</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 cursor-pointer">
+                                <input id="media-type-video" type="radio" name="popup-media-type" value="video" class="admin-radio">
+                                <span class="text-sm font-medium text-slate-700">Video</span>
+                            </label>
+                        </div>
+
+                        <!-- 로컬 파일 업로드 (성공 시 Media URL 란에 다운로드 URL 자동 채움) -->
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-file">Or upload a file</label>
+                        <input id="popup-file" type="file" accept="image/*,video/*"
+                               class="w-full mb-1 text-sm text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
+                        <p class="text-xs text-slate-400 mb-2">Image ≤5MB, Video ≤30MB</p>
+
+                        <!-- 업로드 진행률 (기본 숨김, 업로드 중에만 표시) -->
+                        <div id="upload-progress-wrap" class="hidden mb-3">
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div id="upload-progress-bar" class="bg-cyan-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                            <p id="upload-progress-text" class="text-xs text-slate-500 mt-1">0%</p>
+                        </div>
+
+                        <!-- 업로드 상태/에러 메시지 (기본 숨김) -->
+                        <p id="upload-status" class="hidden text-xs mb-3"></p>
 
                         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-message">Message</label>
                         <textarea id="popup-message" rows="5" placeholder="Popup body text…"
@@ -100,7 +130,9 @@
                             </div>
                             <div id="preview-card">
                                 <img id="preview-image" src="" alt="Popup image"
-                                     class="hidden w-full max-h-52 object-cover rounded-xl mb-4">
+                                     class="hidden w-full max-h-52 object-contain bg-slate-50 rounded-xl mb-4">
+                                <video id="preview-video" autoplay muted loop playsinline
+                                       class="hidden w-full max-h-52 object-contain bg-slate-50 rounded-xl mb-4"></video>
                                 <h3 id="preview-title" class="text-xl font-extrabold text-slate-900 mb-2">Popup title</h3>
                                 <p id="preview-message" class="text-sm text-slate-600 whitespace-pre-wrap">Your message will appear here.</p>
                                 <p id="preview-dates" class="text-xs text-slate-400 mt-4"></p>

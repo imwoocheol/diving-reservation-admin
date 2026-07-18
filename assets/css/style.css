@@ -164,3 +164,11 @@ body {
   accent-color: #0891b2;
   cursor: pointer;
 }
+
+/* 어드민 라디오 — 미디어 타입(이미지/비디오) 토글용, 체크박스와 동일 톤 */
+.admin-radio {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #0891b2;
+  cursor: pointer;
+}
