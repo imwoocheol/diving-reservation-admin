@@ -82,6 +82,25 @@ export function categoryOf(b) {
   return TRIP_LABELS.includes(b.trip) ? b.trip : 'Course Inquiry';
 }
 
+// 이메일 형식 검증 — 안내 메일 발송 가능 여부 판단용 (간단한 형태 검사)
+export function isValidEmail(value) {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === '-') return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+}
+
+// 예약 1건 → 안내 메일 수신 주소 결정
+// hero source 는 email 필드, booking_section 은 contact 필드에 이메일이 들어올 수 있음.
+// 전화번호처럼 이메일이 아닌 값은 걸러내고, 유효한 이메일이 없으면 null 반환.
+export function resolveEmailAddress(b) {
+  const candidates = [b && b.email, b && b.contact];
+  for (const candidate of candidates) {
+    if (isValidEmail(candidate)) return candidate.trim();
+  }
+  return null;
+}
+
 export function escapeHtml(str) {
   return String(str == null ? '' : str)
     .replace(/&/g, '&amp;')

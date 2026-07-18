@@ -20,8 +20,16 @@ import {
   contactOf,
   tripOrCourseOf,
   escapeHtml,
+  resolveEmailAddress,
 } from './booking-shared.js';
 import { initSidebarLogout, setUserEmail } from './sidebar.js';
+import { sendStatusEmail } from './email.js';
+
+// 확인 팝업이 필요한 상태 (이메일 안내 발송 대상)
+const CONFIRM_STATUSES = ['booked', 'cancelled'];
+
+// 확인 모달에서 처리 대기 중인 상태 변경 정보 (취소 시 select 되돌리기용)
+let pendingStatusChange = null;
 
 // ---- 상태 저장소 ------------------------------------------------------------
 
@@ -36,6 +44,12 @@ const MOCK_BOOKINGS = [
   { id: 'mock003', name: 'Sarah Lee', source: 'hero', trip: 'Nusa Penida', phone: '+62 811 4444 5555', date: '2026-08-05', status: 'call_back', message: '가격 문의 후 재통화 요청', createdAt: { toDate: () => new Date() } },
   { id: 'mock004', name: 'John Park', source: 'hero', trip: 'Tulamben', phone: '+62 811 6666 7777', date: '2026-08-02', status: 'cancelled', message: '일정 변경으로 취소', createdAt: { toDate: () => new Date() } },
   { id: 'mock005', name: 'Yuki Tanaka', source: 'booking_section', course: 'Advanced', contact: 'yuki@test.com', date: '2026-08-07', status: 'pending', message: '', createdAt: { toDate: () => new Date() } },
+  // 검증 케이스 A: hero source + 유효한 email 필드 → 안내 메일 발송 대상
+  { id: 'mock006', name: 'Emma Wilson', source: 'hero', trip: 'Sanur', phone: '+62 811 8888 9999', email: 'emma.wilson@example.com', date: '2026-08-09', status: 'pending', message: '가족 다이빙 패키지 문의', createdAt: { toDate: () => new Date() } },
+  // 검증 케이스 B: hero source + email 없음("-") → 이메일 없음, 상태만 변경
+  { id: 'mock007', name: 'Chris Brown', source: 'hero', trip: 'Padang Bai', phone: '+62 811 1010 2020', email: '-', date: '2026-08-10', status: 'pending', message: '전화 상담만 희망', createdAt: { toDate: () => new Date() } },
+  // 검증 케이스 C: booking_section + contact 가 전화번호 형식 → 이메일 아님, 상태만 변경
+  { id: 'mock008', name: 'Olivia Martin', source: 'booking_section', course: 'Rescue Diver', contact: '+62 812 3434 5656', date: '2026-08-11', status: 'pending', message: '레스큐 코스 일정 문의', createdAt: { toDate: () => new Date() } },
 ];
 
 // ---- 필터링 ------------------------------------------------------------------
@@ -118,8 +132,17 @@ function renderTable() {
     .join('');
 
   // 상태 변경 이벤트 바인딩
+  // Booked / Cancelled 로 바꾸면 확인 모달을 띄우고(고객 안내 메일 발송), 그 외 상태는 즉시 변경.
   tbody.querySelectorAll('.status-select').forEach((sel) => {
-    sel.addEventListener('change', (e) => onStatusChange(e.target.dataset.id, e.target.value));
+    sel.addEventListener('change', (e) => {
+      const id = e.target.dataset.id;
+      const status = e.target.value;
+      if (CONFIRM_STATUSES.includes(status)) {
+        openStatusConfirm(id, status, e.target);
+      } else {
+        onStatusChange(id, status);
+      }
+    });
   });
   // 상세보기 이벤트 바인딩
   tbody.querySelectorAll('.detail-btn').forEach((btn) => {
@@ -129,7 +152,11 @@ function renderTable() {
 
 // ---- 상태 변경 write ---------------------------------------------------------
 
-async function onStatusChange(id, status) {
+// 상태 변경을 Firestore 에 기록하고, Booked/Cancelled 이며 유효한 수신 이메일이 있으면 안내 메일을 발송.
+// toEmail 은 확인 모달에서 미리 계산해 전달 (없으면 메일 발송 생략).
+async function onStatusChange(id, status, toEmail) {
+  const booking = bookings.find((x) => x.id === id) || null;
+
   try {
     await updateDoc(doc(db, 'bookings', id), {
       status,
@@ -140,7 +167,80 @@ async function onStatusChange(id, status) {
   } catch (err) {
     console.error('[Firestore] 상태 변경 실패:', err);
     alert('Failed to update status. Please check your permissions or network connection.');
+    return; // 상태 변경 자체가 실패하면 이메일도 보내지 않음
   }
+
+  // 안내 메일 발송 (Booked/Cancelled 이며 유효한 수신 이메일이 있을 때만)
+  if (booking && CONFIRM_STATUSES.includes(status) && toEmail) {
+    try {
+      await sendStatusEmail(booking, status, toEmail);
+      // 발송 성공 → 발송 시각/수신 주소 기록 (감사 로그 용도)
+      await updateDoc(doc(db, 'bookings', id), {
+        emailSentAt: serverTimestamp(),
+        emailSentTo: toEmail,
+      });
+    } catch (err) {
+      // 이메일 발송 실패 시에도 상태 변경은 유지하고 안내만 함
+      console.error('[EmailJS] 안내 메일 발송 실패:', err);
+      alert('Status updated, but the notification email could not be sent.');
+    }
+  }
+}
+
+// ---- 상태 변경 확인 모달 -----------------------------------------------------
+
+// Booked/Cancelled 로 변경 시 확인 팝업을 띄움. 수신 이메일 유무를 함께 안내.
+function openStatusConfirm(id, status, selectEl) {
+  const b = bookings.find((x) => x.id === id);
+  if (!b) return;
+
+  const prevStatus = b.status;
+  const toEmail = resolveEmailAddress(b);
+  pendingStatusChange = { id, status, selectEl, prevStatus, toEmail };
+
+  const statusLabel = (STATUS_META[status] || STATUS_META.pending).label;
+  const guest = b.name || 'this guest';
+
+  const titleEl = document.getElementById('status-confirm-title');
+  const messageEl = document.getElementById('status-confirm-message');
+  const emailEl = document.getElementById('status-confirm-email');
+
+  titleEl.textContent = `Change status to ${statusLabel}?`;
+  messageEl.innerHTML = `Set <span class="font-semibold text-slate-800">${escapeHtml(guest)}</span>'s booking to <span class="font-semibold text-slate-800">${escapeHtml(statusLabel)}</span>.`;
+
+  if (toEmail) {
+    // 안내 메일 발송 예정 — 초록 톤
+    emailEl.className = 'mt-3 text-xs rounded-xl px-3 py-2 bg-green-50 text-green-700 ring-1 ring-green-100';
+    emailEl.innerHTML = `A ${escapeHtml(statusLabel)} notification email will be sent to <span class="font-semibold">${escapeHtml(toEmail)}</span>.`;
+  } else {
+    // 유효한 이메일 없음 — 상태만 변경, 주황 톤
+    emailEl.className = 'mt-3 text-xs rounded-xl px-3 py-2 bg-orange-50 text-orange-700 ring-1 ring-orange-100';
+    emailEl.textContent = 'No valid email on file — the status will change without sending an email.';
+  }
+
+  const modal = document.getElementById('status-confirm-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+// 확인 모달 닫기. revert=true 이면 드롭다운 값을 원래 상태로 되돌림(취소한 경우).
+function closeStatusConfirm(revert) {
+  if (revert && pendingStatusChange && pendingStatusChange.selectEl) {
+    pendingStatusChange.selectEl.value = pendingStatusChange.prevStatus;
+  }
+  const modal = document.getElementById('status-confirm-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  pendingStatusChange = null;
+}
+
+// 확인 버튼 → 상태 변경 + 이메일 발송 진행
+function confirmStatusChange() {
+  if (!pendingStatusChange) return;
+  const { id, status, toEmail } = pendingStatusChange;
+  // 모달은 즉시 닫되 select 값은 유지(변경 확정 상태)
+  closeStatusConfirm(false);
+  onStatusChange(id, status, toEmail);
 }
 
 // ---- 상세보기 모달 -----------------------------------------------------------
@@ -226,6 +326,13 @@ bindTabs();
 document.getElementById('detail-close').addEventListener('click', closeDetail);
 document.getElementById('detail-modal').addEventListener('click', (e) => {
   if (e.target.id === 'detail-modal') closeDetail();
+});
+
+// 상태 변경 확인 모달 바인딩 (취소/배경 클릭 시 드롭다운 값 원복)
+document.getElementById('status-confirm-ok').addEventListener('click', confirmStatusChange);
+document.getElementById('status-confirm-cancel').addEventListener('click', () => closeStatusConfirm(true));
+document.getElementById('status-confirm-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'status-confirm-modal') closeStatusConfirm(true);
 });
 
 if (new URLSearchParams(location.search).get('mock') === '1') {
