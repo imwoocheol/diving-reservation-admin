@@ -5,6 +5,7 @@ import {
   EMAILJS_SERVICE_ID,
   EMAILJS_TEMPLATE_BOOKED,
   EMAILJS_TEMPLATE_CANCELLED,
+  EMAILJS_TEMPLATE_CUSTOM,
 } from './email-config.js';
 import { tripOrCourseOf } from './booking-shared.js';
 
@@ -53,4 +54,21 @@ export async function sendStatusEmail(booking, status, toEmail) {
   };
 
   return window.emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams);
+}
+
+// 고객 대상 커스텀 메일 발송 (Customers 페이지에서 관리자가 직접 제목/본문 작성)
+// toEmail: 수신 이메일, toName: 수신자 이름, subject: 제목, message: 본문
+// 발송 성공 시 EmailJS 응답을 resolve, 실패 시 reject → 호출부에서 try/catch 처리
+export async function sendCustomEmail(toEmail, toName, subject, message) {
+  ensureInit();
+
+  // 템플릿에서 사용할 변수들 — EmailJS 템플릿의 {{변수명}} 과 매칭됨
+  const templateParams = {
+    to_email: toEmail,
+    to_name: toName || 'Guest',
+    subject,
+    message,
+  };
+
+  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOM, templateParams);
 }

@@ -23,6 +23,7 @@ import {
   resolveEmailAddress,
 } from './booking-shared.js';
 import { initSidebarLogout, setUserEmail } from './sidebar.js';
+import { renderNav } from './nav.js';
 import { sendStatusEmail } from './email.js';
 
 // 확인 팝업이 필요한 상태 (이메일 안내 발송 대상)
@@ -322,6 +323,7 @@ function bindTabs() {
 
 // ---- 부트스트랩 -------------------------------------------------------------
 
+renderNav('bookings.html');
 bindTabs();
 document.getElementById('detail-close').addEventListener('click', closeDetail);
 document.getElementById('detail-modal').addEventListener('click', (e) => {

@@ -155,3 +155,12 @@ body {
 .filter-tab.active .filter-tab-count {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* 어드민 체크박스 — 브랜드 cyan 톤으로 통일 (customers/popup) */
+.admin-checkbox {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.35rem;
+  accent-color: #0891b2;
+  cursor: pointer;
+}

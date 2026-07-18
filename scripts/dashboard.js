@@ -10,6 +10,7 @@ import { db } from './firebase-config.js';
 import { requireAuth } from './auth-guard.js';
 import { CATEGORY_COLORS, TRIP_LABELS, toDate, isSameMonth, categoryOf } from './booking-shared.js';
 import { initSidebarLogout, setUserEmail } from './sidebar.js';
+import { renderNav } from './nav.js';
 
 // ---- 상태 저장소 ------------------------------------------------------------
 
@@ -255,6 +256,7 @@ function initGreeting(user) {
   document.getElementById('greeting-date').textContent = today;
 }
 
+renderNav('dashboard.html');
 initSidebarLogout();
 
 // 인증 확정 후에만 데이터/차트 렌더 (미인증이면 requireAuth가 로그인으로 리다이렉트)

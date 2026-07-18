@@ -15,3 +15,6 @@ export const EMAILJS_TEMPLATE_BOOKED = 'template_zhery99';
 
 // 예약 취소(Cancelled) 안내 메일 템플릿 ID (예: template_xxxxxxx)
 export const EMAILJS_TEMPLATE_CANCELLED = 'template_7c0fzue';
+
+// 고객 대상 커스텀 메일(관리자가 직접 제목/본문 작성) 템플릿 ID (예: template_xxxxxxx)
+export const EMAILJS_TEMPLATE_CUSTOM = 'YOUR_EMAILJS_TEMPLATE_CUSTOM';

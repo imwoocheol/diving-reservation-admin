@@ -19,14 +19,7 @@
                 </p>
                 <p class="text-xs text-slate-400 font-medium mt-0.5">Admin</p>
             </div>
-            <nav class="flex flex-col gap-1.5">
-                <a href="dashboard.html" class="side-link">
-                    <span>▦</span> Dashboard
-                </a>
-                <a href="bookings.html" class="side-link active">
-                    <span>▤</span> Bookings
-                </a>
-            </nav>
+            <nav id="sidebar-nav" class="flex flex-col gap-1.5"></nav>
             <div class="mt-auto pt-6 border-t border-slate-100">
                 <p class="text-xs text-slate-400 mb-1">Signed in as</p>
                 <p id="user-email" class="text-sm font-semibold text-slate-700 truncate mb-3">—</p>
@@ -45,10 +38,7 @@
                     <p class="text-lg font-extrabold text-cyan-700">BALI <span class="text-slate-900">SCUBA</span></p>
                     <button id="logout-btn-mobile" class="text-sm font-semibold text-slate-600">Sign Out</button>
                 </div>
-                <nav class="flex gap-1 px-3 pb-2">
-                    <a href="dashboard.html" class="mobile-nav-link">Dashboard</a>
-                    <a href="bookings.html" class="mobile-nav-link active">Bookings</a>
-                </nav>
+                <nav id="mobile-nav" class="flex gap-1 px-3 pb-2"></nav>
             </div>
 
             <main class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
