@@ -93,3 +93,65 @@ body {
   color: #ffffff;
   box-shadow: 0 8px 18px rgba(8, 145, 178, 0.25);
 }
+
+/* 모바일 상단 nav 탭 (side-link와 톤 통일) */
+.mobile-nav-link {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+.mobile-nav-link:hover {
+  background: #f0f9ff;
+  color: #0e7490;
+}
+.mobile-nav-link.active {
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(8, 145, 178, 0.25);
+}
+
+/* 예약 상태 필터 탭 (bookings.html) */
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+.filter-tab:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+.filter-tab.active {
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(8, 145, 178, 0.2);
+}
+.filter-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.08);
+  color: inherit;
+}
+.filter-tab.active .filter-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+}
