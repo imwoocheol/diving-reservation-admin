@@ -22,6 +22,36 @@ function hideError() {
   errorBox.classList.add('hidden');
 }
 
+// 브라우저 기본 검증 말풍선("이 입력란을 작성하세요.")은 OS/브라우저 언어를 따르므로
+// 영어 메시지를 직접 지정한다
+function forceEnglishValidation(input, messages) {
+  const applyMessage = () => {
+    // 커스텀 메시지를 먼저 비워야 브라우저가 실제 validity 를 다시 계산한다
+    input.setCustomValidity('');
+    if (input.validity.valid) return;
+
+    let message = 'Please enter a valid value.';
+    if (input.validity.valueMissing && messages.valueMissing) {
+      message = messages.valueMissing;
+    } else if (input.validity.typeMismatch && messages.typeMismatch) {
+      message = messages.typeMismatch;
+    }
+    input.setCustomValidity(message);
+  };
+
+  input.addEventListener('invalid', applyMessage);
+  // 사용자가 값을 고치면 커스텀 에러를 해제해 다시 제출할 수 있게 한다
+  input.addEventListener('input', () => input.setCustomValidity(''));
+}
+
+forceEnglishValidation(emailInput, {
+  valueMissing: 'Please enter your email address.',
+  typeMismatch: 'Please enter a valid email address.',
+});
+forceEnglishValidation(passwordInput, {
+  valueMissing: 'Please enter your password.',
+});
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError();

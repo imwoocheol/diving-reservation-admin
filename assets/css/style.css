@@ -172,3 +172,14 @@ body {
   accent-color: #0891b2;
   cursor: pointer;
 }
+
+/* Flatpickr 달력 — 브랜드 cyan 톤으로 통일 (popup 시작/종료 날짜) */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: #0891b2;
+  border-color: #0891b2;
+}
+
+.flatpickr-day.today {
+  border-color: #0891b2;
+}

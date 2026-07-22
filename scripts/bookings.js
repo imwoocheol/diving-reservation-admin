@@ -262,7 +262,8 @@ function openDetail(id) {
     ['Preferred Date', b.date || 'TBD'],
     ['Channel', b.channel || '-'],
     ['Status', (STATUS_META[b.status] || STATUS_META.pending).label],
-    ['Received', d ? d.toLocaleString() : '—'],
+    // 로케일을 명시하지 않으면 브라우저 언어를 따라 한국어로 출력되므로 en-US 로 고정
+    ['Received', d ? d.toLocaleString('en-US') : '—'],
   ];
   body.innerHTML =
     rows

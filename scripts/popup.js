@@ -38,6 +38,34 @@ const els = {
   mediaTypeVideo: () => document.getElementById('media-type-video'),
 };
 
+// 날짜 선택기: 브라우저/OS 언어와 무관하게 항상 영어로 표시.
+// 네이티브 <input type="date">는 플레이스홀더와 달력이 브라우저 언어를 따르고
+// lang 속성이나 CSS로 통제할 수 없어 Flatpickr 로 교체한다.
+// 고객 사이트와 달리 minDate 를 두지 않는다 — 어드민은 이미 지난 캠페인도 열람/수정해야 한다.
+const DATE_PICKER_BASE = {
+  dateFormat: 'Y-m-d', // 원본 input 에 남는 값 (Firestore 저장용, 기존 포맷 유지)
+  altInput: true,
+  altFormat: 'F j, Y', // 화면에 보이는 값 (예: August 15, 2026)
+  disableMobile: true, // 모바일에서 네이티브(로케일 종속) 피커로 폴백되는 것 방지
+  altInputClass:
+    'w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40',
+  // flatpickr 는 원본 input 에 change 만 발생시켜 input 리스너가 걸리지 않으므로
+  // 미리보기 갱신을 여기서 직접 호출한다
+  onChange: () => renderPreview(),
+};
+
+const startPicker = flatpickr('#popup-start', DATE_PICKER_BASE);
+const endPicker = flatpickr('#popup-end', DATE_PICKER_BASE);
+
+// 값이 없으면 비우고, 있으면 지정한다 (onChange 는 발생시키지 않음 — 불러오기는 사용자 입력이 아님)
+function setPickerDate(picker, value) {
+  if (value) {
+    picker.setDate(value, false);
+  } else {
+    picker.clear(false);
+  }
+}
+
 // 현재 선택된 미디어 타입 라디오 값 반환 ('image' | 'video'), 없으면 'image'
 function readMediaType() {
   return els.mediaTypeVideo() && els.mediaTypeVideo().checked ? 'video' : 'image';
@@ -70,8 +98,10 @@ function fillForm(data) {
   els.title().value = data.title || '';
   els.image().value = data.imageUrl || '';
   els.message().value = data.message || '';
-  els.start().value = data.startDate || '';
-  els.end().value = data.endDate || '';
+  // altInput 사용 시 원본 input 에 직접 대입하면 화면에 보이는 필드가 갱신되지 않으므로
+  // 반드시 flatpickr API 로 값을 넣는다
+  setPickerDate(startPicker, data.startDate);
+  setPickerDate(endPicker, data.endDate);
   els.enabled().checked = data.enabled === true;
   // mediaType 필드가 없는 예전 데이터는 image 로 취급 (하위 호환)
   setMediaType(data.mediaType === 'video' ? 'video' : 'image');
@@ -296,7 +326,9 @@ async function loadConfig() {
 // ---- 이벤트 바인딩 ----------------------------------------------------------
 
 function bindFormEvents() {
-  ['title', 'image', 'message', 'start', 'end'].forEach((key) => {
+  // start/end 는 flatpickr onChange 에서 renderPreview 를 호출하므로 여기서 제외한다
+  // (원본 input 이 hidden 이라 input 이벤트가 발생하지 않음)
+  ['title', 'image', 'message'].forEach((key) => {
     els[key]().addEventListener('input', renderPreview);
   });
   els.enabled().addEventListener('change', renderPreview);

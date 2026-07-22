@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bali Scuba Admin - Popup</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Flatpickr: 브라우저 언어와 무관하게 날짜 UI를 항상 영어로 표시 (l10n 파일 미로드 = 기본 영어) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -99,12 +102,12 @@
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-start">Start date</label>
-                                <input id="popup-start" type="date"
+                                <input id="popup-start" type="text" placeholder="Select a date"
                                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-end">End date</label>
-                                <input id="popup-end" type="date"
+                                <input id="popup-end" type="text" placeholder="Select a date"
                                        class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40">
                             </div>
                         </div>
