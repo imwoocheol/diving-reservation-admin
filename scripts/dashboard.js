@@ -188,7 +188,8 @@ function initCharts() {
               const total = data.reduce((sum, v) => sum + v, 0);
               const value = context.parsed;
               const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-              return `${context.label}: ${value}건 (${pct}%)`;
+              const unit = value === 1 ? 'booking' : 'bookings';
+              return `${context.label}: ${value} ${unit} (${pct}%)`;
             },
           },
         },

@@ -80,8 +80,17 @@
 
                         <!-- 로컬 파일 업로드 (성공 시 Media URL 란에 다운로드 URL 자동 채움) -->
                         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1" for="popup-file">Or upload a file</label>
-                        <input id="popup-file" type="file" accept="image/*,video/*"
-                               class="w-full mb-1 text-sm text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
+                        <!-- 네이티브 파일 input 의 "파일 선택 / 선택된 파일 없음" 은 브라우저 UI 언어를 따르고
+                             HTML/CSS 로 바꿀 수 없다. input 은 화면에서만 숨기고(접근성 위해 DOM 유지),
+                             라벨과 파일명 텍스트를 직접 영어로 렌더링한다. -->
+                        <input id="popup-file" type="file" accept="image/*,video/*" class="sr-only">
+                        <div class="flex items-center gap-3 mb-1">
+                            <label for="popup-file"
+                                   class="shrink-0 cursor-pointer py-2 px-3 rounded-xl text-sm font-semibold bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors">
+                                Choose File
+                            </label>
+                            <span id="popup-file-name" class="text-sm text-slate-600 truncate">No file selected</span>
+                        </div>
                         <p class="text-xs text-slate-400 mb-2">Image ≤5MB, Video ≤30MB</p>
 
                         <!-- 업로드 진행률 (기본 숨김, 업로드 중에만 표시) -->
