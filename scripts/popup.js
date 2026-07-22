@@ -205,6 +205,13 @@ function hideUploadProgress() {
   document.getElementById('upload-progress-wrap').classList.add('hidden');
 }
 
+// 선택된 파일명 표시 — 네이티브 "선택된 파일 없음"(브라우저 언어 종속)을 대체한다
+function updateFileName() {
+  const fileInput = els.file();
+  const file = fileInput.files && fileInput.files[0];
+  document.getElementById('popup-file-name').textContent = file ? file.name : 'No file selected';
+}
+
 // 파일 input change 핸들러 — 검증 후 Storage 업로드, 완료 시 URL/라디오/미리보기 반영
 function onFileSelected(isMock) {
   const fileInput = els.file();
@@ -332,6 +339,8 @@ function bindFormEvents() {
     els[key]().addEventListener('input', renderPreview);
   });
   els.enabled().addEventListener('change', renderPreview);
+  // 업로드 성공 여부와 무관하게 선택된 파일명은 항상 갱신한다
+  els.file().addEventListener('change', updateFileName);
   // 미디어 타입 라디오 변경 시에도 미리보기 갱신
   els.mediaTypeImage().addEventListener('change', renderPreview);
   els.mediaTypeVideo().addEventListener('change', renderPreview);
