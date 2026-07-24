@@ -131,6 +131,11 @@
                         </button>
 
                         <p id="save-status" class="hidden text-xs mt-3 text-center"></p>
+
+                        <!-- 팝업 문서를 Firestore 에서 완전히 삭제 (되돌릴 수 없음 → 확인 모달 경유) -->
+                        <button id="delete-btn" class="w-full mt-2 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors">
+                            Delete popup
+                        </button>
                     </section>
 
                     <!-- 실시간 미리보기 -->
@@ -155,6 +160,22 @@
                 </div>
 
             </main>
+        </div>
+    </div>
+
+    <!-- 팝업 삭제 확인 모달 (bookings 의 status-confirm-modal 과 동일 패턴) -->
+    <div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800">Delete popup</h3>
+            </div>
+            <div class="px-6 py-5">
+                <p class="text-sm text-slate-600">This permanently removes the popup banner. Customers will no longer see it, and this cannot be undone.</p>
+            </div>
+            <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100">
+                <button id="delete-confirm-cancel" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors">Cancel</button>
+                <button id="delete-confirm-ok" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors">Delete</button>
+            </div>
         </div>
     </div>
 

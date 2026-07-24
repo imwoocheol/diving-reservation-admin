@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {
@@ -313,6 +314,49 @@ async function onSave(isMock) {
   }
 }
 
+// ---- 삭제 -------------------------------------------------------------------
+
+// 삭제 확인 모달 열기/닫기
+function openDeleteConfirm() {
+  const modal = document.getElementById('delete-confirm-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeDeleteConfirm() {
+  const modal = document.getElementById('delete-confirm-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// 팝업 문서를 Firestore 에서 삭제하고 폼을 빈 상태로 초기화
+async function onDelete(isMock) {
+  closeDeleteConfirm();
+  const deleteBtn = document.getElementById('delete-btn');
+  deleteBtn.disabled = true;
+
+  // 목업 모드에서는 Firestore 호출 없이 삭제한 척만 함
+  if (isMock) {
+    fillForm({});
+    renderPreview();
+    showSaveStatus('Deleted (mock — not persisted).', true);
+    deleteBtn.disabled = false;
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, 'siteConfig', 'popup'));
+    fillForm({}); // 삭제 후 폼을 빈 상태로 되돌림
+    renderPreview();
+    showSaveStatus('Popup deleted.', true);
+  } catch (err) {
+    console.error('[Firestore] 팝업 설정 삭제 실패:', err);
+    showSaveStatus('Failed to delete. Check permissions or network.', false);
+  } finally {
+    deleteBtn.disabled = false;
+  }
+}
+
 // ---- 불러오기 ---------------------------------------------------------------
 
 async function loadConfig() {
@@ -344,6 +388,13 @@ function bindFormEvents() {
   // 미디어 타입 라디오 변경 시에도 미리보기 갱신
   els.mediaTypeImage().addEventListener('change', renderPreview);
   els.mediaTypeVideo().addEventListener('change', renderPreview);
+
+  // 삭제 확인 모달 — 취소/바깥 클릭은 모드와 무관하게 그냥 닫기
+  document.getElementById('delete-btn').addEventListener('click', openDeleteConfirm);
+  document.getElementById('delete-confirm-cancel').addEventListener('click', closeDeleteConfirm);
+  document.getElementById('delete-confirm-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'delete-confirm-modal') closeDeleteConfirm();
+  });
 }
 
 // ---- 부트스트랩 -------------------------------------------------------------
@@ -356,6 +407,7 @@ if (new URLSearchParams(location.search).get('mock') === '1') {
   // 목업 모드 — Firestore/Storage 호출 없이 폼/미리보기만 동작
   setUserEmail('mock@example.com');
   document.getElementById('save-btn').addEventListener('click', () => onSave(true));
+  document.getElementById('delete-confirm-ok').addEventListener('click', () => onDelete(true));
   els.file().addEventListener('change', () => onFileSelected(true));
   renderPreview();
 } else {
@@ -363,6 +415,7 @@ if (new URLSearchParams(location.search).get('mock') === '1') {
     currentUser = user;
     setUserEmail(user.email);
     document.getElementById('save-btn').addEventListener('click', () => onSave(false));
+    document.getElementById('delete-confirm-ok').addEventListener('click', () => onDelete(false));
     els.file().addEventListener('change', () => onFileSelected(false));
     loadConfig();
   });
